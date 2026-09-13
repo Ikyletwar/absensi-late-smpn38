@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- ============================================ -->
+    <!-- 🔥 EXISTING PERMISSIONS                      -->
+    <!-- ============================================ -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+
+    <!-- ============================================ -->
+    <!-- 🔥 NEW PERMISSIONS — VERIFIED PHASE 0        -->
+    <!-- ============================================ -->
+
+    <!-- Android 13+ NEARBY_WIFI_DEVICES (runtime)
+         Ref: developer.android.com/develop/connectivity/wifi/wifi-permissions
+         Uses neverForLocation flag karena app tidak derive lokasi dari Wi-Fi -->
+    <uses-permission
+        android:name="android.permission.NEARBY_WIFI_DEVICES"
+        android:usesPermissionFlags="neverForLocation" />
+
+    <!-- Backward compatibility untuk Android 12 ke bawah
+         maxSdkVersion="32" berarti permission ini hanya berlaku sampai API 32 -->
+    <uses-permission
+        android:name="android.permission.ACCESS_FINE_LOCATION"
+        android:maxSdkVersion="32" />
+
+    <!-- Internet untuk NanoHTTPD server (local network only) -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+
+    <application
+        android:name="com.osis.smkn1malteng.absensilate.AbsensiLateApp"
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@drawable/logo_sekolah"
+        android:roundIcon="@drawable/logo_sekolah"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.AbsensiLate"
+        android:usesCleartextTraffic="true"
+        tools:targetApi="31">
+
+        <activity
+            android:name="com.osis.smkn1malteng.absensilate.MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.App.Starting">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+    </application>
+</manifest>
