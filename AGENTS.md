@@ -58,7 +58,8 @@
 - **User menjalankan build sendiri.** JANGAN PERNAH jalankan gradle (./gradlew clean assembleDebug --no-daemon --offline) kecuali user minta.
 - Setelah perubahan file, INGATKAN user untuk build.
 - **BUILD SUCCESSFUL = 0 errors.** Warnings boleh ada (pre-existing), tapi TIDAK BOLEH ada error (tapi jangan sampai memicu Halting Problem / Hindari Halting Problem).
-- **Debug vs Release build (lag startup):** build `assembleDebug` di-install akan JIT-compile saat jalan → di HP low-end panic lag rasa lambat pada menit-menit awal (punggung input dsj) lalu lancar. Ini NORMAL, bukan bug. Untuk pemakaian/kirim ke sekolah gunakan `./gradlew clean assembleRelease --no-daemon --offline` (APK di `app/build/outputs/apk/release/app-release.apk`) → saat install langsung di-AOT → tanpa lag. Release sudah di-konfigurasi pakai `signingConfig signingConfigs.debug`. JANGAN report "lag pas awal" padahal install build debug.
+- **Debug vs Release build (lag startup):** build `assembleDebug` di-install akan JIT-compile saat jalan → di HP low-end panic lag rasa lambat pada menit-menit awal (punggung input dsj) lalu lancar. Ini NORMAL, bukan bug. Untuk pemakaian/kirim ke sekolah gunakan `./gradlew clean assembleRelease --no-daemon --offline`. JANGAN report "lag pas awal" padahal install build debug.
+- **⚠️ Release TIDAK di-set `signingConfig signingConfigs.debug`** di `build.gradle` → hasil build = **unsigned** (`app/build/outputs/apk/release/app-release-unsigned.apk`). APK unsigned TIDAK BISA diinstall. Signing dilakukan **manual oleh user** (mis. `apksigner sign` pakai keystore miliknya, atau debug keystore `~/.android/debug.keystore` password `android`). JANGAN menambah `signingConfig` ke `build.gradle` tanpa diminta user.
 
 ### 2.2 Sebelum Bilang "Selesai"
 - Pastikan semua import benar dan lengkap.

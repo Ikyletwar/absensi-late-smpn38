@@ -46,11 +46,15 @@ object RosterBackup {
     }
 
     fun parseRosterFromUri(contentResolver: ContentResolver, uri: Uri): List<StudentEntity> {
-        val students = mutableListOf<StudentEntity>()
         val lines = contentResolver.openInputStream(uri)?.use { inputStream ->
             inputStream.bufferedReader().readLines()
-        } ?: return students
+        } ?: return emptyList()
+        return parseRoster(lines)
+    }
 
+    // Parse roster CSV dari daftar baris. Dipakai untuk URI content maupun seed asset (app/src/main/assets).
+    fun parseRoster(lines: List<String>): List<StudentEntity> {
+        val students = mutableListOf<StudentEntity>()
         if (lines.isEmpty()) return students
 
         // 🔥 VALIDASI HEADER — file yang bukan roster (mis. CSV export lama 9 kolom) DITOLAK.

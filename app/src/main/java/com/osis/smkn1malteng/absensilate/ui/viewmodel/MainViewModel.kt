@@ -90,6 +90,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         Log.d(TAG, "ViewModel init started")
         try {
             initConfig()
+            seedStudentsIfNeeded()
             loadStudents()
             loadPendingViolations()
             Log.d(TAG, "ViewModel init completed — DB access delegated to coroutines")
@@ -98,6 +99,57 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             _uiState.value = _uiState.value.copy(
                 errorMessage = "Gagal inisialisasi: ${e.message}"
             )
+        }
+    }
+
+    // ============================================
+    // 🔥 SEED DATA SISWA (pertama kali instal)
+    // ============================================
+
+    // Saat pertama kali aplikasi dibuka, DB masih kosong → isi otomatis dari asset
+    // seed_students.csv (roster 713 siswa SMPN 38). Hanya berjalan SEKALI;
+    // kalau DB sudah berisi data (mis. update app), dilewati tanpa mengubah apapun.
+    private fun seedStudentsIfNeeded() {
+        val prefs = getApplication<Application>().getSharedPreferences(
+            "absensi_prefs", Context.MODE_PRIVATE
+        )
+        if (prefs.getBoolean("seed_students_done", false)) {
+            Log.d(TAG, "Seed: sudah pernah dijalankan — lewati")
+            return
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val count = studentDao.getCount()
+                if (count > 0) {
+                    Log.d(TAG, "Seed: DB sudah berisi $count siswa — lewati")
+                } else {
+                    val seed = loadSeedFromAssets()
+                    if (seed.isNotEmpty()) {
+                        db.withTransaction { studentDao.insertAll(seed) }
+                        Log.d(TAG, "Seed: ${seed.size} siswa dimasukkan ke DB")
+                    } else {
+                        Log.w(TAG, "Seed: file seed kosong / tidak terbaca")
+                    }
+                }
+                withContext(Dispatchers.Main) {
+                    prefs.edit().putBoolean("seed_students_done", true).apply()
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Seed FAILED", e)
+            }
+        }
+    }
+
+    // Baca & parse file roster seed dari assets → daftar StudentEntity (tanpa pelanggaran).
+    private fun loadSeedFromAssets(): List<StudentEntity> {
+        return try {
+            val lines = getApplication<Application>().assets.open("seed_students.csv")
+                .bufferedReader().use { it.readLines() }
+            Log.d(TAG, "Seed: asset seed_students.csv dibaca (${lines.size} baris)")
+            RosterBackup.parseRoster(lines)
+        } catch (e: Exception) {
+            Log.e(TAG, "loadSeedFromAssets FAILED", e)
+            emptyList()
         }
     }
 

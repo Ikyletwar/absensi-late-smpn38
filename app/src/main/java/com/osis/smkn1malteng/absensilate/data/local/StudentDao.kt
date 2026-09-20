@@ -15,6 +15,9 @@ interface StudentDao {
     @Query("SELECT * FROM students WHERE violationCount >= :threshold ORDER BY violationCount DESC")
     fun getStudentsWithViolations(threshold: Int): Flow<List<StudentEntity>>
 
+    @Query("SELECT COUNT(*) FROM students")
+    suspend fun getCount(): Int
+
     @Query("SELECT * FROM students WHERE name = :name LIMIT 1")
     suspend fun getStudentByName(name: String): StudentEntity?
 
